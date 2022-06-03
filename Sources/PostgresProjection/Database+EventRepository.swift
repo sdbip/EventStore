@@ -2,17 +2,16 @@ import Postgres
 import Projection
 
 extension Database: EventRepository {
-    public func readEvents(maxCount: Int, after position: Int64?) throws -> [Event] {
-        let operation = try operation("""
-            SELECT "entityId", "entityType", "name", "details", "position" FROM "Events" WHERE "position" > $1 LIMIT \(maxCount)
-            """,
-            parameters: Int(position ?? -1))
-        return try operation.query {
-            return try Event(
-                entity: Entity(id: $0[0].string(), type: $0[1].string()),
-                name: $0[2].string(),
-                details: $0[3].string(),
-                position: Int64($0[4].int()))
+    public func readEvents(maxCount: Int, after position: Int64?) async throws -> [Event] {
+        let rows = try await query("""
+            SELECT "entityId", "entityType", "name", "details", "position" FROM "Events" WHERE "position" > \(position ?? -1) LIMIT \(maxCount)
+            """, as: (String, String, String, String, Int64).self)
+        return rows.map {
+            Event(
+                entity: Entity(id: $0.0, type: $0.1),
+                name: $0.2,
+                details: $0.3,
+                position: $0.4)
         }
     }
 }

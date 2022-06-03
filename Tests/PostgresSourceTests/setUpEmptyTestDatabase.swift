@@ -1,5 +1,5 @@
 import XCTest
-import PostgresClientKit
+import PostgresNIO
 
 import Postgres
 import PostgresSource
@@ -13,26 +13,29 @@ let credentials = Credentials(
     username: ProcessInfo.processInfo.environment["POSTGRES_TEST_USER"]!,
     password: ProcessInfo.processInfo.environment["POSTGRES_TEST_PASS"])
 
+var eventLoopGroup: MultiThreadedEventLoopGroup!
+
 var database: Database!
 
-public func setUpEmptyTestDatabase() throws -> Database {
+public func setUpEmptyTestDatabase() async throws -> Database {
     if database == nil {
-        try createTestDatabase()
+        eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+        try await createTestDatabase()
 
-        database = try Database.connect(host: host, credentials: credentials)
+        database = try await Database.connect(on: eventLoopGroup.next(), host: host, credentials: credentials)
     }
 
-    try Schema.add(to: database)
-    try database.operation(#"DELETE FROM "Events""#).execute()
-    try database.operation(#"DELETE FROM "Entities""#).execute()
-    try database.operation(#"UPDATE "Properties" SET "value" = 0 WHERE "name" = 'next_position'"#).execute()
-    
+    try await Schema.add(to: database)
+    try await database.execute(#"DELETE FROM "Events""#)
+    try await database.execute(#"DELETE FROM "Entities""#)
+    try await database.execute(#"UPDATE "Properties" SET "value" = 0 WHERE "name" = 'next_position'"#)
+
     return database
 }
 
-private func createTestDatabase() throws {
+private func createTestDatabase() async throws {
     var noDbHost = host
     noDbHost.database = nil
-    let noDb = try Database.connect(host: noDbHost, credentials: credentials)
-    try? noDb.operation("CREATE DATABASE \(host.database!)").execute()
+    let noDb = try await Database.connect(on: eventLoopGroup.next(), host: noDbHost, credentials: credentials)
+    _ = try? await noDb.execute(PostgresQuery(unsafeSQL: "CREATE DATABASE \(host.database!)"))
 }

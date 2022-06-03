@@ -1,4 +1,3 @@
-import PostgresClientKit
 import XCTest
 
 import Postgres
@@ -8,13 +7,13 @@ final class PublishingTests: XCTestCase {
     var publisher: EventPublisher!
     var entityStore: EntityStore!
     var database: Database!
-    
+
     override func setUp() async throws {
-        database = try setUpEmptyTestDatabase()
+        database = try await setUpEmptyTestDatabase()
         publisher = EventPublisher(repository: database)
         entityStore = EntityStore(repository: database)
     }
-
+    
     func test_canPublishEntityWithoutEvents() async throws {
         let entity = Entity(id: "test", state: TestEntity())
         entity.state.unpublishedEvents = []
@@ -98,8 +97,10 @@ final class PublishingTests: XCTestCase {
 
         try await publisher.publishChanges(entity: entity, actor: "user_x")
 
-        XCTAssertEqual(try database.nextPosition(), 4)
-        XCTAssertEqual(try maxPositionOfEvents(forEntityWithId: "test"), 3)
+        let nextPosition = try await database.nextPosition()
+        let maxPositionOfEvents = try await maxPositionOfEvents(forEntityWithId: "test")
+        XCTAssertEqual(nextPosition, 4)
+        XCTAssertEqual(maxPositionOfEvents, 3)
     }
 
     private func history<__State>(afterPublishingChangesFor entity: Entity<__State>, actor: String) async throws -> History? where __State: EntityState {
@@ -107,10 +108,10 @@ final class PublishingTests: XCTestCase {
         return try await entityStore.history(forEntityWithId: entity.id)
     }
 
-    private func maxPositionOfEvents(forEntityWithId id: String) throws -> Int64? {
-        return try database.operation(
-            #"SELECT MAX(position) FROM "Events" WHERE "entityId" = 'test'"#
-        ).single { try Int64($0[0].int()) }
+    private func maxPositionOfEvents(forEntityWithId id: String) async throws -> Int64? {
+        return try await database.single(
+            #"SELECT MAX(position) FROM "Events" WHERE "entityId" = 'test'"#,
+            as: Int64.self)
     }
 }
 

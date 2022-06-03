@@ -1,5 +1,4 @@
 import XCTest
-import PostgresClientKit
 
 import Postgres
 import PostgresSource
@@ -10,12 +9,12 @@ final class HistoryLoadTests: XCTestCase {
     var database: Database!
 
     override func setUp() async throws {
-        database = try setUpEmptyTestDatabase()
+        database = try await setUpEmptyTestDatabase()
         store = EntityStore(repository: database)
     }
-    
+
     func test_fetchesEntityData() async throws {
-        try database.operation(#"INSERT INTO "Entities" ("id", "type", "version") VALUES ('test', 'TheType', 42)"#).execute()
+        try await database.insertEntityRow(id: "test", type: "TheType", version: 42)
 
         let history = try await store.history(forEntityWithId: "test")
         XCTAssertEqual(history?.type, "TheType")
@@ -23,8 +22,8 @@ final class HistoryLoadTests: XCTestCase {
     }
 
     func test_fetchesEventData() async throws {
-        try database.insertEntityRow(id: "test", type: "TheType", version: 42)
-        try database.insertEventRow(entityId: "test", entityType: "TheType", name: "TheEvent", jsonDetails: "{}", actor: "a_user", version: 0, position: 0)
+        try await database.insertEntityRow(id: "test", type: "TheType", version: 42)
+        try await database.insertEventRow(entityId: "test", entityType: "TheType", name: "TheEvent", jsonDetails: "{}", actor: "a_user", version: 0, position: 0)
 
         guard let history = try await store.history(forEntityWithId: "test") else { return XCTFail("No history returned") }
 
@@ -36,12 +35,12 @@ final class HistoryLoadTests: XCTestCase {
     }
 
     func test_convertsTimestampFromJulianDay() async throws {
-        try database.insertEntityRow(id: "test", type: "TheType", version: 42)
-        try database.operation("""
+        try await database.insertEntityRow(id: "test", type: "TheType", version: 42)
+        try await database.execute("""
             INSERT INTO "Events" ("entityId", "entityType", "name", "details", "actor", "timestamp", "version", "position") VALUES
                 ('test', 'TheType', 'any', '{}', 'any', 2459683.17199667, 0, 0)
             """
-        ).execute()
+        )
 
         guard let history = try await store.history(forEntityWithId: "test") else { return XCTFail("No history returned") }
         guard let event = history.events.first else { return XCTFail("No event returned")}

@@ -1,12 +1,15 @@
 import Foundation
+import PostgresNIO
 
 public enum Schema {
-    public static func add(to database: Database) throws {
+    public static func add(to database: Database) async throws {
         guard let schema = try bundledSchema() else { fatalError() }
 
-        // PostgresClientKit only supports executing one statement per request.
+        // PostgresNIO only supports executing one statement per request.
+        // And it doesn't know to ignore empty requests.
         for sql in schema.split(separator: ";") {
-            try database.operation(String(sql)).execute()
+            if String(sql).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { continue }
+            try await database.execute(PostgresQuery(unsafeSQL: String(sql)))
         }
     }
 
@@ -15,4 +18,3 @@ public enum Schema {
         return try NSString(contentsOfFile: schemaFile, encoding: String.Encoding.utf8.rawValue) as String
     }
 }
-
