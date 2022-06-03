@@ -14,19 +14,19 @@ final class HistoryLoadTests: XCTestCase {
         store = EntityStore(repository: database)
     }
     
-    func test_fetchesEntityData() throws {
+    func test_fetchesEntityData() async throws {
         try database.operation(#"INSERT INTO "Entities" ("id", "type", "version") VALUES ('test', 'TheType', 42)"#).execute()
 
-        let history = try store.history(forEntityWithId: "test")
+        let history = try await store.history(forEntityWithId: "test")
         XCTAssertEqual(history?.type, "TheType")
         XCTAssertEqual(history?.version, 42)
     }
 
-    func test_fetchesEventData() throws {
+    func test_fetchesEventData() async throws {
         try database.insertEntityRow(id: "test", type: "TheType", version: 42)
         try database.insertEventRow(entityId: "test", entityType: "TheType", name: "TheEvent", jsonDetails: "{}", actor: "a_user", version: 0, position: 0)
 
-        guard let history = try store.history(forEntityWithId: "test") else { return XCTFail("No history returned") }
+        guard let history = try await store.history(forEntityWithId: "test") else { return XCTFail("No history returned") }
 
         XCTAssertEqual(history.events.count, 1)
 
@@ -35,7 +35,7 @@ final class HistoryLoadTests: XCTestCase {
         XCTAssertEqual(history.events[0].actor, "a_user")
     }
 
-    func test_convertsTimestampFromJulianDay() throws {
+    func test_convertsTimestampFromJulianDay() async throws {
         try database.insertEntityRow(id: "test", type: "TheType", version: 42)
         try database.operation("""
             INSERT INTO "Events" ("entityId", "entityType", "name", "details", "actor", "timestamp", "version", "position") VALUES
@@ -43,7 +43,7 @@ final class HistoryLoadTests: XCTestCase {
             """
         ).execute()
 
-        guard let history = try store.history(forEntityWithId: "test") else { return XCTFail("No history returned") }
+        guard let history = try await store.history(forEntityWithId: "test") else { return XCTFail("No history returned") }
         guard let event = history.events.first else { return XCTFail("No event returned")}
 
         XCTAssertEqual("\(formatWithMilliseconds(date: event.timestamp))", "2022-04-13 16:07:40.515 +0000")

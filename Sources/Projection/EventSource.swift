@@ -1,7 +1,3 @@
-import Dispatch
-
-private let queue = DispatchQueue(label: "EventSource")
-
 public final class EventSource {
     private let repository: EventRepository
     private let delegate: PositionDelegate?
@@ -17,30 +13,28 @@ public final class EventSource {
         receptacles.append(receptacle)
     }
 
-    public func projectEvents(count: Int) throws {
-        try queue.sync {
-            if lastProjectedPosition == nil {
-                lastProjectedPosition = try delegate?.lastProjectedPosition()
-            }
+    public func projectEvents(count: Int) async throws {
+        if lastProjectedPosition == nil {
+            lastProjectedPosition = try delegate?.lastProjectedPosition()
+        }
 
-            let events = try nextEvents(count: count)
-            for event in events {
-                for receptacle in receptacles.filter({ $0.handledEvents.contains(event.name) }) {
-                    receptacle.receive(event)
-                }
-                lastProjectedPosition = event.position
-                try delegate?.update(position: event.position)
+        let events = try await nextEvents(count: count)
+        for event in events {
+            for receptacle in receptacles.filter({ $0.handledEvents.contains(event.name) }) {
+                receptacle.receive(event)
             }
+            lastProjectedPosition = event.position
+            try delegate?.update(position: event.position)
         }
     }
 
-    private func nextEvents(count: Int) throws -> [Event] {
-        return try repository.readEvents(maxCount: count, after: lastProjectedPosition)
+    private func nextEvents(count: Int) async throws -> [Event] {
+        return try await repository.readEvents(maxCount: count, after: lastProjectedPosition)
     }
 }
 
 public protocol EventRepository {
-    func readEvents(maxCount: Int, after position: Int64?) throws -> [Event]
+    func readEvents(maxCount: Int, after position: Int64?) async throws -> [Event]
 }
 
 public protocol Receptacle {

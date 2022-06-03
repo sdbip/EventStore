@@ -7,18 +7,18 @@ public struct EntityStore {
         self.repository = repository
     }
 
-    public func type(ofEntityWithId id: String) throws -> String? {
-        return try repository.type(ofEntityRowWithId: id)
+    public func type(ofEntityWithId id: String) async throws -> String? {
+        return try await repository.type(ofEntityRowWithId: id)
     }
 
-    public func reconstitute<State: EntityState>(entityWithId id: String) throws -> Entity<State>? {
-        guard let history = try history(forEntityWithId: id) else { return nil }
+    public func reconstitute<State: EntityState>(entityWithId id: String) async throws -> Entity<State>? {
+        guard let history = try await history(forEntityWithId: id) else { return nil }
         return try history.entity()
     }
 
-    public func history(forEntityWithId id: String) throws -> History? {
-        guard let entityRow = try repository.entityRow(withId: id) else { return nil }
-        let eventRows = try repository.allEventRows(forEntityWithId: id).map {
+    public func history(forEntityWithId id: String) async throws -> History? {
+        guard let entityRow = try await repository.entityRow(withId: id) else { return nil }
+        let eventRows = try await repository.allEventRows(forEntityWithId: id).map {
             PublishedEvent(name: $0.name, details: $0.details, actor: $0.actor, timestamp: Date(julianDay: $0.timestamp))
         }
         return History(id: entityRow.id, type: entityRow.type, events: eventRows, version: .eventCount(entityRow.version))

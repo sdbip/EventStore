@@ -2,10 +2,10 @@ import Source
 import SQLite
 
 extension Database: EventPublisherRepository {
-    public func transaction<T>(do block: () throws -> T) throws -> T {
+    public func transaction<T>(do block: () async throws -> T) async throws -> T {
         try operation("BEGIN").execute()
         do {
-            let result = try block()
+            let result = try await block()
             try operation("COMMIT").execute()
             return result
         } catch {
