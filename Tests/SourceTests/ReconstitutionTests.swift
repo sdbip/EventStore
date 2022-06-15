@@ -10,10 +10,10 @@ final class ReconstitutionTests: XCTestCase {
             version: 3
         )
 
-        let entity: Entity<TestEntity> = try history.entity()
+        let entity: TestEntity = try history.entity()
 
         XCTAssertNotNil(entity)
-        XCTAssertEqual(entity.state.reconstitutedEvents?.first?.name, "test")
+        XCTAssertEqual(entity.reconstitutedEvents?.first?.name, "test")
     }
 
     func test_setsVersion() throws {
@@ -24,7 +24,7 @@ final class ReconstitutionTests: XCTestCase {
             version: 3
         )
 
-        let entity: Entity<TestEntity> = try history.entity()
+        let entity: TestEntity = try history.entity()
 
         XCTAssertNotNil(entity)
         XCTAssertEqual(entity.version, 3)
@@ -38,7 +38,7 @@ final class ReconstitutionTests: XCTestCase {
             version: 3
         )
 
-        XCTAssertThrowsError(try history.entity() as Entity<TestEntity>)
+        XCTAssertThrowsError(try history.entity() as TestEntity)
     }
 }
 

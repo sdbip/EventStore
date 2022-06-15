@@ -17,12 +17,12 @@ public struct History {
     }
 
     /// Initializes the ``Entity`` object that is represented by this ``History``
-    public func entity<State: EntityState>() throws -> Entity<State> {
-        guard State.typeId == type else {
+    public func entity<EntityType: Entity>() throws -> EntityType {
+        guard EntityType.typeId == type else {
             throw ReconstitutionError.incorrectType
         }
 
-        return Entity(id: id, state: State(events: events), version: version)
+        return EntityType(id: id, version: version, publishedEvents: events)
     }
 }
 

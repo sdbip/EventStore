@@ -28,7 +28,7 @@ public struct EntityStore {
     ///
     /// - Throws: if the associated ``EntityState`` has the wrong `type` identifier.
     /// - Throws: If the database operation fails
-    public func reconstitute<State: EntityState>(entityWithId id: String) throws -> Entity<State>? {
+    public func reconstitute<EntityType: Entity>(entityWithId id: String) throws -> EntityType? {
         guard let history = try history(forEntityWithId: id) else { return nil }
         return try history.entity()
     }
