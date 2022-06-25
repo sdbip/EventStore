@@ -13,7 +13,7 @@ public protocol Entity: AnyObject {
     /// the conforming type may be a good rule of thumb.
     ///
     /// ```
-    /// public class MyEntity: EntityState {
+    /// public class MyEntity: Entity {
     ///     public static let type = "MyEntity"
     ///     // Futher implementation
     /// }
