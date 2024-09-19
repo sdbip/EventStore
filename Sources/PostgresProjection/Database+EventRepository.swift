@@ -1,7 +1,7 @@
 import Postgres
 import Projection
 
-extension Database: EventRepository {
+extension Database: @retroactive EventRepository {
     public func readEvents(maxCount: Int, after position: Int64?) throws -> [Event] {
         let operation = try operation("""
             SELECT entity_id, entity_type, name, details, position FROM Events WHERE "position" > $1 LIMIT \(maxCount)

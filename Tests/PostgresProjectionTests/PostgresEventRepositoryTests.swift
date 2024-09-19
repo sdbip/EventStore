@@ -68,7 +68,7 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 }
 
-extension Event: Equatable {
+extension Event: @retroactive Equatable {
     public static func ==(left: Event, right: Event) -> Bool {
         return left.entity == right.entity &&
         left.name == right.name &&

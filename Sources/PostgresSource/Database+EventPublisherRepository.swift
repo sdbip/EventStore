@@ -1,7 +1,7 @@
 import Source
 import Postgres
 
-extension Database: EventPublisherRepository {
+extension Database: @retroactive EventPublisherRepository {
     public func transaction<T>(do block: () throws -> T) throws -> T {
         try operation("BEGIN").execute()
         do {
