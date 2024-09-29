@@ -4,6 +4,8 @@ A package for using event-sourcing in applications. It is particularly useful wh
 
 State is stored in a relational database with built-in support for SQLite and PostgreSQL.
 
+EventStore needs to run on a backend server. This package does not include a web server but you can try using [Vapor](https://vapor.codes) or [Webber](https://github.com/swifweb/webber).
+
 # The Concept Behind Event Sourcing
 
 The idea of event sourcing is to not simply store the current *state* of the application, but instead store each historical *change* to the state. We call such changes *events*.
