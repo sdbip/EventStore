@@ -8,6 +8,13 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
+            name: "Source",
+            targets: ["Source"]),
+        .library(
+            name: "Projection",
+            targets: ["Projection"]),
+
+        .library(
             name: "PostgresSource",
             targets: ["Source", "PostgresSource"]),
         .library(
