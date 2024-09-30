@@ -54,9 +54,17 @@ Unlike value objects, entities possess an identifier. Since the `Entity` is stat
 
 ## Events
 
-By focusing on how the state *changes*, we can better understand how our domain works.
+DDD teaches us to focus on how the business processes *change* the state rather than just what the state is at any given time. By focusing on how the changes, and the reason for the changes, we can better understand how our domain works.
 
-This library employs event sourcing, which means that we define the state of an entity by listing the changes that has happened to it since it was first added to the system/application. These changes are commonly referred to as *events*. The state of the entity hasn't officially changed until the events are published. When they have been published, they are forever a part of the entity's history. They are never changed or removed. The history up to that point will never change. Any new events will always be appended to the end of the history.
+This library employs event sourcing, which means that we define the state of an entity by listing the changes that has happened to it since it was first added to the system/application. These changes are commonly referred to as `Event`s. Events specify the details of how the state changed, which user caused it and at what time the change occurred.
+
+By storing all events in a way that persists their chronology, the current state of the entire system is well defined. In functional programming terms the state of each `Entity` can be implemented as a simple `fold()` operation. The state of the complete system being the aggregated state of all entities is then the `fold()` operation mapped over the list of lists that is the events of all entities.
+
+A CQRS solution can then synchronise (project) the events into a searchable query database. When the projection/query database is first set up, all the existing events should be processed in order. As new events are then published, the projection server should pick up those events and update the projection/query database accordingly.
+
+And it is also well defined what the state was at any point of time in the past. This fact can be used to debug the system. The events up to a given point in time can be copied to a new database and then used to recreate the system state at that time. Then experimentation can find the bug allowing it to be fixed.
+
+Projection can be used for other purposes than the Query side of CQRS. It can for example be used to communicate between bounded contexts. Or it can be used to generate one-off reports. Or myriad other things.
 
 # Technical Notes
 
