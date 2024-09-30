@@ -8,9 +8,11 @@ EventStore needs to run on a backend server. This package does not include a web
 
 # The Concept Behind Event Sourcing
 
-The idea of event sourcing is to not simply store the current *state* of the application, but instead store each historical *change* to the state. We call such changes *events*.
+By focusing on how the state *changes*, we can better understand how our domain works.
 
-There are some benefits to using this idea; the most obvious ones are perhaps immutability and auditing. When an event has been recorded, that information will itself never change. It makes referring to the data much simpler, and you need never worry about concurrent updates. Every event also records a timestamp and a username. This can be very useful metadata for auditing and where to invest in more education.
+The idea of event sourcing is to not simply store the current *state* of the application, but instead store each historical *change* to the state. We call such changes ‘events.’
+
+There are some benefits to using this idea; the most obvious ones are perhaps immutability and auditing. When an event has been recorded, that historical information will itself never change. It makes referring to the data much simpler, and you need never worry about concurrent updates. Every event also records a timestamp and a username which can be very useful metadata for auditing.
 
 Event sourcing also allows creating independent *projections* of the state. You can replay all the changes at any time, and maintain a different storage location with an alternate view into the data. For example you can gather all the current state for easy indexing and quick access. You can ignore a lot of the information, and focus on generating the data structure that makes your particular use case simple and performant.
 
@@ -18,11 +20,21 @@ Event Sourcing is a product of Domain-Driven Design (DDD). In DDD, we have two c
 
 ## Value Objects
 
-Value objects in general are not modeled here, but it is still important to understand them. A value object is (as the term implies) an object that represents a specific value. Values cannot be modified, only replaced. Value objects are therefore always immutable (except maybe in Swift).
+Value objects are not modeled by this library, but it is still important to understand them.
 
-In Swift, value objects can be defined through value-semantics (`struct`). Thanks to copy-on-write, Swift has much less need for immutability. In rare cases, you might decide that it is okay to make value objects mutable. You should still be very restricted with *how* the objects may be changed, though.
+A value object is (as the term implies) an object that represents a specific value. Values never change; you can only replace a value with a new one. Value objects are therefore always immutable.
 
-Value objects are also encapsulated. They have an internal representation of data and an external interface. Users of the value object may only couple to the interface, not to the data representation.
+Value objects typically have two functions: they can be compared for structural equality, and they can be validated for correct user input.
+
+It should not be possible to instantiate an invalid value object. The initializer should prevent such, typically by throwing an exception or returning `nil` when invalid data is encountered. If the programmer can rely on this working, they will not need to validate the data in their code; it is enough to declare that a variable must be of the correct type (and not `nil`).
+
+Most value objects conform to `Equatable` and `Hashable`. They can thus be used in sets and as dictionary keys. A mutable object used as a dictionary key can be changed after it's added making it impossible to find again. Immutability is necessary to guarantee correct behaviour.
+
+`Equatable` value objects can also be `Comparable` and they can be used in calculations. You might for example add (`+`) two value objects of same type to get their sum. Or you might multiply a value object with a scalar (e.g. an interest rate). The result of a calculation is typically an object of the same type as the input, but it could be otherwise. E.g. `Ingredient1` plus `Ingredient2` might return a `Cake`.
+
+Value objects should also be encapsulated. They should have an internal representation of data and an external interface. Users of the value object should only ever couple to the interface, never to the concrete data representation. That allows the storage strategy to change without breaking references to the value object. And it also helps the programmer stay focussed on the *meaning* of the value rather than its *composition*.
+
+Should, for example, the data representation of an amount of `Money` be composed of an `Int` counting the cents (100 meaning one dollar), a `Double` value of dollars (0.5 to represent 50 cents) or two separate `Int` values (one for dollars and one for cents, where cents < 100)? If you ever need to change the data format to support new use cases or a need for higher precision, encapsulation is a guard against errors in all code outside the `Money` type itself.
 
 ## Entities
 
