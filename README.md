@@ -92,14 +92,14 @@ The `Events` table:
 "name" TEXT
 "details" TEXT
 "actor" TEXT
-"timestamp" DECIMAL(12,7) -- Julian Day (days since ) representation
+"timestamp" DECIMAL(12,7)
 "version" INT
 "position" BIGINT
 ```
 
 The events table is the main storage space for entity state. The `entity_id` and `entity_type` columns must match the corresponding columns for a row in the `Entities` table. This is the entity that changed with this event.
 
-The `name` and `details` (JSON) columns define what changed for the entity. The `version` column orders events per entity, and the last event stored for an entity must match its `version` column. The `position` column orders events globally and is motly used for projections.
+The `name` and `details` (JSON) columns define what changed for the entity. The `version` column orders events per entity. The `position` column orders events globally and is mostly used for projections.
 
 The `actor` and `timestamp` columns are metadata that can be used for auditing.
 
@@ -107,7 +107,7 @@ The `timestamp` is stored as the number of days (including fraction) that have p
 
 ## Database Support
 
-There is currently only support for two database providers.
+EventStore comes with support for two database providers.
 
 - PostgreSQL
 - SQLite
