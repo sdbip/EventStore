@@ -111,8 +111,8 @@ final class PublishingTests: XCTestCase {
 
         try publisher.publishChanges(to: entity, actor: "user_x")
 
-        XCTAssertEqual(try database.nextPosition(), 4)
-        XCTAssertEqual(try maxPositionOfEvents(forEntityWithId: "test"), 3)
+        XCTAssertEqual(try database.nextPosition(), 2)
+        XCTAssertEqual(try maxPositionOfEvents(forEntityWithId: "test"), 1)
     }
 
     private func history<EntityType: Entity>(afterPublishingChangesFor entity: EntityType, actor: String) throws -> History? {

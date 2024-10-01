@@ -73,7 +73,7 @@ public struct EventPublisher {
                 try repository.insertEntityRow(id: entityId, type: entityType, version: Int32(events.count))
             }
 
-            var nextPosition = try repository.nextPosition()
+            let nextPosition = try repository.nextPosition()
 
             var nextVersion = (currentVersion ?? -1) + 1
             for event in events {
@@ -86,7 +86,6 @@ public struct EventPublisher {
                     version: nextVersion,
                     position: nextPosition)
                 nextVersion += 1
-                nextPosition += 1
             }
         }
     }
