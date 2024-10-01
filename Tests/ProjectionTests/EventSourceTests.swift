@@ -142,6 +142,7 @@ final class EventSourceTests: XCTestCase {
             entity: Entity(id: "some_entity", type: "some_type"),
             name: name,
             details: "{}",
+            version: 0,
             position: position)
     }
 }

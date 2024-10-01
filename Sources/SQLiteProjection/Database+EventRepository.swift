@@ -4,7 +4,7 @@ import Projection
 extension Database: @retroactive EventRepository {
     public func readEvents(maxCount: Int, after position: Int64?) throws -> [Event] {
         let operation = try operation("""
-            SELECT entity_id, entity_type, name, details, position FROM Events WHERE position > $1 LIMIT \(maxCount)
+            SELECT entity_id, entity_type, name, details, version, position FROM Events WHERE position > $1 LIMIT \(maxCount)
             """,
             position ?? -1)
         return try operation.query {
@@ -18,7 +18,8 @@ extension Database: @retroactive EventRepository {
                 entity: Entity(id: entityId, type: type),
                 name: name,
                 details: details,
-                position: $0.int64(at: 4))
+                version: Int($0.int32(at: 4)),
+                position: $0.int64(at: 5))
         }
     }
 }

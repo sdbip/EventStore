@@ -39,6 +39,7 @@ final class SQLiteEventRepositoryTests: XCTestCase {
                 entity: Entity(id: "entity", type: "type"),
                 name: "name",
                 details: "{}",
+                version: 1,
                 position: 1
             )])
     }
@@ -89,6 +90,7 @@ extension Event: @retroactive Equatable {
         return left.entity == right.entity &&
         left.name == right.name &&
         left.jsonDetails == right.jsonDetails &&
+        left.version == right.version &&
         left.position == right.position
     }
 }
