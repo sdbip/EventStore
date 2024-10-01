@@ -58,6 +58,8 @@ public final class EventSource {
         let events: [Event]
         if oneTooMany.count <= maxCount {
             events = oneTooMany
+        } else if oneTooMany.allSatisfy({ $0.position == oneTooMany[0].position }) {
+            events = oneTooMany
         } else if oneTooMany[maxCount].position == oneTooMany[maxCount - 1].position {
             events = oneTooMany.filter { $0.position != oneTooMany[maxCount].position }
         } else {

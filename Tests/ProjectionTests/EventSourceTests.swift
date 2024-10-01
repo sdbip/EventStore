@@ -119,6 +119,20 @@ final class EventSourceTests: XCTestCase {
         XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent"])
     }
 
+    func test_notifyLargePositions() throws {
+        let receptacle = TestReceptacle(handledEvents: ["TheFirstEvent", "TheSecondEvent", "TheThirdEvent"])
+        eventSource.add(receptacle)
+        repository.nextEvents = [
+            event(named: "TheFirstEvent", position: 1),
+            event(named: "TheSecondEvent", position: 1),
+        ]
+
+        try eventSource.projectEvents(maxCount: 1)
+
+        XCTAssertEqual(delegate.lastUpdatedPosition, 1)
+        XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent", "TheSecondEvent"])
+    }
+
     private func event(named name: String) -> Event {
         event(named: name, position: 0)
     }
