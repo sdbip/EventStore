@@ -84,7 +84,7 @@ The `Entity` should define a number of events, and calling its operations should
 
 The Projection target is meant to implement the Command/Query side synchronisation for a CQRS system. This model is even simpler than the Source. An `Entity` in the Projection target is simply a value object that identifies the entity in question. And there is only one `Event` type.
 
-An `EventSource` object should be set up with a list of `Receptacle` objects. The `EventSource` should then be asked periodically to `projectEvents(count: Int)`. This will find a maximum of `count` events read from the Source database and project them to the receptacles. A `PositionDelegate` is used to persist metadata on which events have already been processsed so they will not be reporocessed after a restart.
+An `EventSource` object should be set up with a list of `Receptacle` objects. The `EventSource` should then be asked periodically to `projectEvents(maxCount: Int)`. This will find a maximum of `count` events read from the Source database and project them to the receptacles. A `PositionDelegate` is used to persist metadata on which events have already been processsed so they will not be reporocessed after a restart.
 
 # Technical Notes
 

@@ -17,7 +17,7 @@ final class EventSourceTests: XCTestCase {
         eventSource.add(receptacle)
         repository.nextEvents = [event(named: "UnhandledEvent")]
 
-        try eventSource.projectEvents(count: 1)
+        try eventSource.projectEvents(maxCount: 1)
 
         XCTAssertEqual(receptacle.receivedEvents, [])
     }
@@ -27,7 +27,7 @@ final class EventSourceTests: XCTestCase {
         eventSource.add(receptacle)
         repository.nextEvents = []
 
-        try eventSource.projectEvents(count: 1)
+        try eventSource.projectEvents(maxCount: 1)
 
         XCTAssertEqual(receptacle.receivedEvents, [])
     }
@@ -37,7 +37,7 @@ final class EventSourceTests: XCTestCase {
         eventSource.add(receptacle)
         repository.nextEvents = [event(named: "TheEvent")]
 
-        try eventSource.projectEvents(count: 1)
+        try eventSource.projectEvents(maxCount: 1)
 
         XCTAssertEqual(receptacle.receivedEvents, ["TheEvent"])
     }
@@ -47,7 +47,7 @@ final class EventSourceTests: XCTestCase {
         eventSource.add(receptacle)
         repository.nextEvents = [event(named: "TheFirstEvent"), event(named: "TheSecondEvent")]
 
-        try eventSource.projectEvents(count: 2)
+        try eventSource.projectEvents(maxCount: 2)
 
         XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent", "TheSecondEvent"])
     }
@@ -57,7 +57,7 @@ final class EventSourceTests: XCTestCase {
         eventSource.add(receptacle)
         repository.nextEvents = [event(named: "TheFirstEvent", position: 0), event(named: "TheSecondEvent", position: 1)]
 
-        try eventSource.projectEvents(count: 1)
+        try eventSource.projectEvents(maxCount: 1)
 
         XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent"])
     }
@@ -72,7 +72,7 @@ final class EventSourceTests: XCTestCase {
             event(named: "TheSecondEvent", position: 2)
         ]
 
-        try eventSource.projectEvents(count: 2)
+        try eventSource.projectEvents(maxCount: 2)
 
         XCTAssertEqual(receptacle.receivedEvents, ["TheSecondEvent"])
     }
@@ -85,8 +85,8 @@ final class EventSourceTests: XCTestCase {
             event(named: "TheSecondEvent", position: 2)
         ]
 
-        try eventSource.projectEvents(count: 1)
-        try eventSource.projectEvents(count: 1)
+        try eventSource.projectEvents(maxCount: 1)
+        try eventSource.projectEvents(maxCount: 1)
 
         XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent", "TheSecondEvent"])
     }
@@ -99,7 +99,7 @@ final class EventSourceTests: XCTestCase {
             event(named: "TheSecondEvent", position: 2)
         ]
 
-        try eventSource.projectEvents(count: 2)
+        try eventSource.projectEvents(maxCount: 2)
 
         XCTAssertEqual(delegate.lastUpdatedPosition, 2)
     }
