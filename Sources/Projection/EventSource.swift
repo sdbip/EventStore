@@ -37,7 +37,7 @@ public final class EventSource {
 
             let eventsByPosition = try nextEventsByPosition(maxCount: maxCount)
             for (position, events) in eventsByPosition {
-                for event in events {
+                for event in events.sorted(by: { $0.version < $1.version }) {
                     for receptacle in receptacles.filter({ $0.handledEvents.contains(event.name) }) {
                         receptacle.receive(event)
                     }

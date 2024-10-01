@@ -133,6 +133,20 @@ final class EventSourceTests: XCTestCase {
         XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent", "TheSecondEvent"])
     }
 
+    func test_eventsAreSortedByVersion() throws {
+        let receptacle = TestReceptacle(handledEvents: ["TheFirstEvent", "TheSecondEvent", "TheThirdEvent"])
+        eventSource.add(receptacle)
+        repository.nextEvents = [
+            event(named: "TheSecondEvent", version: 2),
+            event(named: "TheFirstEvent", version: 1),
+            event(named: "TheThirdEvent", version: 3),
+        ]
+
+        try eventSource.projectEvents(maxCount: 2)
+
+        XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent", "TheSecondEvent", "TheThirdEvent"])
+    }
+
     private func event(named name: String) -> Event {
         event(named: name, position: 0)
     }
@@ -144,6 +158,15 @@ final class EventSourceTests: XCTestCase {
             details: "{}",
             version: 0,
             position: position)
+    }
+
+    private func event(named name: String, version: Int) -> Event {
+        Event(
+            entity: Entity(id: "some_entity", type: "some_type"),
+            name: name,
+            details: "{}",
+            version: version,
+            position: 0)
     }
 }
 
