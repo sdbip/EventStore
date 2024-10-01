@@ -104,6 +104,21 @@ final class EventSourceTests: XCTestCase {
         XCTAssertEqual(delegate.lastUpdatedPosition, 2)
     }
 
+    func test_doesNotNotifyPartialPosition() throws {
+        let receptacle = TestReceptacle(handledEvents: ["TheFirstEvent", "TheSecondEvent", "TheThirdEvent"])
+        eventSource.add(receptacle)
+        repository.nextEvents = [
+            event(named: "TheFirstEvent", position: 1),
+            event(named: "TheSecondEvent", position: 2),
+            event(named: "TheThirdEvent", position: 2),
+        ]
+
+        try eventSource.projectEvents(maxCount: 2)
+
+        XCTAssertEqual(delegate.lastUpdatedPosition, 1)
+        XCTAssertEqual(receptacle.receivedEvents, ["TheFirstEvent"])
+    }
+
     private func event(named name: String) -> Event {
         event(named: name, position: 0)
     }

@@ -54,7 +54,15 @@ public final class EventSource {
     }
 
     private func nextEventsByPosition(maxCount: Int) throws -> [(Int64, [Event])] {
-        let events = try repository.readEvents(maxCount: maxCount, after: lastProjectedPosition)
+        let oneTooMany = try repository.readEvents(maxCount: maxCount + 1, after: lastProjectedPosition)
+        let events: [Event]
+        if oneTooMany.count <= maxCount {
+            events = oneTooMany
+        } else if oneTooMany[maxCount].position == oneTooMany[maxCount - 1].position {
+            events = oneTooMany.filter { $0.position != oneTooMany[maxCount].position }
+        } else {
+            events = oneTooMany.dropLast()
+        }
         return Dictionary(grouping: events, by: { $0.position })
             .map { ($0.key, $0.value) }
             .sorted { $0.0 < $1.0 }
