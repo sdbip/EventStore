@@ -35,19 +35,29 @@ public final class EventSource {
                 lastProjectedPosition = try delegate?.lastProjectedPosition()
             }
 
-            let events = try nextEvents(maxCount: maxCount)
-            for event in events {
-                for receptacle in receptacles.filter({ $0.handledEvents.contains(event.name) }) {
-                    receptacle.receive(event)
+            let eventsByPosition = try nextEventsByPosition(maxCount: maxCount)
+            for (position, events) in eventsByPosition {
+                for event in events {
+                    for receptacle in receptacles.filter({ $0.handledEvents.contains(event.name) }) {
+                        receptacle.receive(event)
+                    }
                 }
-                lastProjectedPosition = event.position
-                try delegate?.update(position: event.position)
+
+                lastProjectedPosition = position
+                try delegate?.update(position: position)
             }
         }
     }
 
     private func nextEvents(maxCount: Int) throws -> [Event] {
         return try repository.readEvents(maxCount: maxCount, after: lastProjectedPosition)
+    }
+
+    private func nextEventsByPosition(maxCount: Int) throws -> [(Int64, [Event])] {
+        let events = try repository.readEvents(maxCount: maxCount, after: lastProjectedPosition)
+        return Dictionary(grouping: events, by: { $0.position })
+            .map { ($0.key, $0.value) }
+            .sorted { $0.0 < $1.0 }
     }
 }
 
