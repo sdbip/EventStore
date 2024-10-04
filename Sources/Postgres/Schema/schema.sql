@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS Entities (
 
 CREATE TABLE IF NOT EXISTS Events (
     entity_id TEXT NOT NULL,
-    entity_type TEXT NOT NULL,
     name TEXT NOT NULL,
     details TEXT NOT NULL,
     actor TEXT NOT NULL,

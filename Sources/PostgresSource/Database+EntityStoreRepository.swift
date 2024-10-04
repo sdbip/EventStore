@@ -13,11 +13,15 @@ extension Database: @retroactive EntityStoreRepository {
     }
 
     public func allEventRows(entityId: String) throws -> [EventRow] {
-        return try operation("SELECT entity_type, name, details, actor, timestamp FROM Events WHERE entity_id = $1 ORDER BY version",
-                             parameters: entityId)
+        return try operation(
+                """
+                SELECT name, details, actor, timestamp FROM Events
+                	WHERE entity_id = $1
+                    ORDER BY version
+                """,
+                parameters: entityId)
             .query {
-                let entity = try EntityData(id: entityId, type: $0[0].string())
-                return try EventRow(entity: entity, name: $0[1].string(), details: $0[2].string(), actor: $0[3].string(), timestamp: $0[4].double())
+                return try EventRow(entityId: entityId, name: $0[0].string(), details: $0[1].string(), actor: $0[2].string(), timestamp: $0[3].double())
             }
     }
 }

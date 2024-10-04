@@ -14,13 +14,13 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsEvents() throws {
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
 
         let events = try database.readEvents(maxCount: 1, after: 0)
 
         XCTAssertEqual(events,
             [Event(
-                entity: Entity(id: "entity", type: "type"),
+                entity: Entity(id: "entity", type: "a type"),
                 name: "name",
                 details: "{}",
                 version: 1,
@@ -29,9 +29,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsOnlyEventsAtLaterPositions() throws {
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 3, after: 0)
 
@@ -39,9 +39,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsAllEventsWhenNoPositionSpecified() throws {
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 3, after: nil)
 
@@ -49,9 +49,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsFromBeginning_returnsNoMoreThanMaxCountEvents() throws {
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 2, after: nil)
 
@@ -59,9 +59,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsNoMoreThanMaxCountEvents() throws {
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", entityType: "type", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 1, after: 0)
 

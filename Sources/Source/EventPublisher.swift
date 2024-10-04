@@ -79,7 +79,6 @@ public struct EventPublisher {
             for event in events {
                 try repository.insertEventRow(
                     entityId: entityId,
-                    entityType: entityType,
                     name: event.name,
                     jsonDetails: event.jsonDetails,
                     actor: actor,
