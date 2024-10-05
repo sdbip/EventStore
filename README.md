@@ -6,6 +6,20 @@ State is stored in a relational database with built-in support for SQLite and Po
 
 EventStore needs to run on a backend server. This package does not include a web server but you can try using [Vapor](https://vapor.codes) or [Webber](https://github.com/swifweb/webber).
 
+# Build and Test
+
+Start by executing the `./build` command. It will add a pre-commit hook to Git that builds and runs tests; it will cancel the commit if the tests fail.
+
+You can add the `-n` (`--no-verify`) flag to `git commit` to bypass hooks, but that is not recommended.
+
+## PostgreSQL
+
+The tests will fail without write-access to a running PostgreSQL test-database. Ensure that the PostgreSQL server is started, and that a test database has been created, before running tests.
+
+You can download [Postgres.app](https://postgresapp.com) which is probably the easiest to run PostgreSQL on a Mac. It is also available as a [Docker image](https://hub.docker.com/_/postgres/) and by [direct installation](https://www.postgresql.org/download/).
+
+The `./build` command adds the (Git untracked) file developer.env to buildscripts/. You will need to edit the values of the `POSTGRES_TEST_*` variables to match your PostgreSQL setup. Note: `POSTGRES_TEST_HOST` and `POSTGRES_TEST_PASS` are commented out. The defaults are `localhost` and an empty password respectively.
+
 # The Concept Behind Event Sourcing
 
 By focusing on how the state *changes*, we can better understand how our domain works.
