@@ -14,7 +14,7 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsEvents() throws {
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 1, position: 1)
 
         let events = try database.readEvents(maxCount: 1, after: 0)
 
@@ -23,15 +23,15 @@ final class PostgresEventRepositoryTests: XCTestCase {
                 entity: Entity(id: "entity", type: "a type"),
                 name: "name",
                 details: "{}",
-                version: 1,
+                ordinal: 1,
                 position: 1
             )])
     }
 
     func test_readEventsAfter_returnsOnlyEventsAtLaterPositions() throws {
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 3, after: 0)
 
@@ -39,9 +39,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsAllEventsWhenNoPositionSpecified() throws {
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 3, after: nil)
 
@@ -49,9 +49,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsFromBeginning_returnsNoMoreThanMaxCountEvents() throws {
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 2, after: nil)
 
@@ -59,9 +59,9 @@ final class PostgresEventRepositoryTests: XCTestCase {
     }
 
     func test_readEventsAfter_returnsNoMoreThanMaxCountEvents() throws {
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 0, position: 0)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 1, position: 1)
-        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", version: 2, position: 2)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 0, position: 0)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 1, position: 1)
+        try database.insertEventRow(entityId: "entity", name: "name", jsonDetails: "{}", actor: "actor", ordinal: 2, position: 2)
 
         let events = try database.readEvents(maxCount: 1, after: 0)
 
@@ -74,7 +74,7 @@ extension Event: @retroactive Equatable {
         return left.entity == right.entity &&
         left.name == right.name &&
         left.jsonDetails == right.jsonDetails &&
-        left.version == right.version &&
+        left.ordinal == right.ordinal &&
         left.position == right.position
     }
 }

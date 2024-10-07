@@ -19,13 +19,13 @@ extension Database: @retroactive EventPublisherRepository {
             .execute()
     }
 
-    public func insertEventRow(entityId: String, name: String, jsonDetails: String, actor: String, version: Int32, position: Int64) throws {
-        try operation("INSERT INTO Events (entity_id, name, details, actor, version, position) VALUES (?, ?, ?, ?, ?, ?)",
+    public func insertEventRow(entityId: String, name: String, jsonDetails: String, actor: String, ordinal: Int32, position: Int64) throws {
+        try operation("INSERT INTO Events (entity_id, name, details, actor, ordinal, position) VALUES (?, ?, ?, ?, ?, ?)",
             entityId,
             name,
             jsonDetails,
             actor,
-            version,
+            ordinal,
             position
         ).execute()
     }

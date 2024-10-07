@@ -137,9 +137,9 @@ final class EventSourceTests: XCTestCase {
         let receptacle = TestReceptacle(handledEvents: ["TheFirstEvent", "TheSecondEvent", "TheThirdEvent"])
         eventSource.add(receptacle)
         repository.nextEvents = [
-            event(named: "TheSecondEvent", version: 2),
-            event(named: "TheFirstEvent", version: 1),
-            event(named: "TheThirdEvent", version: 3),
+            event(named: "TheSecondEvent", ordinal: 2),
+            event(named: "TheFirstEvent", ordinal: 1),
+            event(named: "TheThirdEvent", ordinal: 3),
         ]
 
         try eventSource.projectEvents(maxCount: 2)
@@ -156,16 +156,16 @@ final class EventSourceTests: XCTestCase {
             entity: Entity(id: "some_entity", type: "some_type"),
             name: name,
             details: "{}",
-            version: 0,
+            ordinal: 0,
             position: position)
     }
 
-    private func event(named name: String, version: Int) -> Event {
+    private func event(named name: String, ordinal: Int) -> Event {
         Event(
             entity: Entity(id: "some_entity", type: "some_type"),
             name: name,
             details: "{}",
-            version: version,
+            ordinal: ordinal,
             position: 0)
     }
 }

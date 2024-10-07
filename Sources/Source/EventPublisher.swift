@@ -82,7 +82,7 @@ public struct EventPublisher {
                     name: event.name,
                     jsonDetails: event.jsonDetails,
                     actor: actor,
-                    version: nextVersion,
+                    ordinal: nextVersion,
                     position: nextPosition)
                 nextVersion += 1
             }

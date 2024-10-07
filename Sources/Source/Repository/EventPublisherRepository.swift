@@ -3,7 +3,7 @@ public protocol EventPublisherRepository {
 
     func insertEntityRow(id: String, type: String, version: Int32) throws
 
-    func insertEventRow(entityId: String, name: String, jsonDetails: String, actor: String, version: Int32, position: Int64) throws
+    func insertEventRow(entityId: String, name: String, jsonDetails: String, actor: String, ordinal: Int32, position: Int64) throws
 
     func nextPosition() throws -> Int64
 

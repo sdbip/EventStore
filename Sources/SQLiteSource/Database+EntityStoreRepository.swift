@@ -19,7 +19,7 @@ extension Database: @retroactive EntityStoreRepository {
         return try operation(
             """
             SELECT name, details, actor, timestamp FROM Events
-            WHERE entity_id = ? ORDER BY version
+            WHERE entity_id = ? ORDER BY ordinal
             """, entityId)
             .query {
                 guard let name = $0.string(at: 0) else { throw SQLiteError.message("Event has no name") }

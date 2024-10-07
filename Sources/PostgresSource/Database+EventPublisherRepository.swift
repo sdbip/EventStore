@@ -19,10 +19,10 @@ extension Database: @retroactive EventPublisherRepository {
             .execute()
     }
 
-    public func insertEventRow(entityId: String, name: String, jsonDetails: String, actor: String, version: Int32, position: Int64) throws {
+    public func insertEventRow(entityId: String, name: String, jsonDetails: String, actor: String, ordinal: Int32, position: Int64) throws {
         try operation(
             """
-            INSERT INTO Events (entity_id, name, details, actor, version, position)
+            INSERT INTO Events (entity_id, name, details, actor, ordinal, position)
             VALUES ($1, $2, $3, $4, $5, $6)
             """,
             parameters:
@@ -30,7 +30,7 @@ extension Database: @retroactive EventPublisherRepository {
             name,
             jsonDetails,
             actor,
-            Int(version),
+            Int(ordinal),
             Int(position)
         ).execute()
     }

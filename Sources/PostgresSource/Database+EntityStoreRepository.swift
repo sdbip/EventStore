@@ -17,7 +17,7 @@ extension Database: @retroactive EntityStoreRepository {
                 """
                 SELECT name, details, actor, timestamp FROM Events
                 	WHERE entity_id = $1
-                    ORDER BY version
+                    ORDER BY ordinal
                 """,
                 parameters: entityId)
             .query {
