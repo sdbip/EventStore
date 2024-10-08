@@ -1,3 +1,9 @@
+<!--
+    This comment only exists to disable the Markdownlint rule
+    MD025/single-title/single-h1: Multiple top-level headings in the same document
+    This behaviour was observed when using https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint
+-->
+
 # EventStore
 
 A package for using event-sourcing in applications. It is particularly useful when using the CQRS architecture style. The Command side would employ the `Source` target, and the Query side would use the `Projection` target.
@@ -167,7 +173,7 @@ EventStore comes with support for two database providers.
 
 ### What about SQL Server?
 
-As of 2022, there is no known SQL Server driver available for Swift. Here's a discussion that indicates some small progress: [https://forums.swift.org/t/sql-server-driver/20327](https://forums.swift.org/t/sql-server-driver/20327). It is unknown what has happened since April 2020.
+As of 2022, there is no known SQL Server driver available for Swift. Here's a discussion that indicates some small progress: <https://forums.swift.org/t/sql-server-driver/20327>. It is unknown what has happened since April 2020.
 
 Apparently SQL Server is not prioritised by the Swift community.
 
@@ -175,5 +181,5 @@ Apparently SQL Server is not prioritised by the Swift community.
 
 MySQL support does not feel as important as SQL Server. On the other hand, MySQL has Swift drivers. Here are a couple:
 
-- [https://github.com/mcorega/MySqlSwiftNative](https://github.com/mcorega/MySqlSwiftNative)
-- [https://github.com/novi/mysql-swift](https://github.com/novi/mysql-swift)
+- <https://github.com/mcorega/MySqlSwiftNative>
+- <https://github.com/novi/mysql-swift>
