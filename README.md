@@ -6,11 +6,11 @@
 
 # EventStore
 
-A package for using event-sourcing in applications. It is particularly useful when using the CQRS architecture style. The Command side would employ the `Source` target, and the Query side would use the `Projection` target.
+A package for employing event-sourcing in applications. It is particularly useful when using the CQRS architecture style. The Command side would reference the `Source` target, and the Query side would use the `Projection` target.
 
-State is stored in a relational database with built-in support for SQLite and PostgreSQL.
+State is stored in a relational database with built-in support for SQLite and PostgreSQL. See the [Tables](#tables) section for schema details.
 
-EventStore needs to run on a backend server. This package does not include a web server but you can try using [Vapor](https://vapor.codes) or [Webber](https://github.com/swifweb/webber).
+This document is meant to help developers contribute to the source code and test their changes. There is separate documentation describing [the concept of event-sourcing](./Documentation/ES.md) and [usage in applications](./Documentation/USAGE.md).
 
 # Build and Test
 
@@ -20,113 +20,29 @@ You can add the `-n` (`--no-verify`) flag to `git commit` to bypass hooks, but t
 
 ## PostgreSQL
 
-The tests will fail without write-access to a running PostgreSQL test-database. Ensure that the PostgreSQL server is started, and that a test database has been created, before running tests.
+The tests will fail without write-access to a running PostgreSQL test-database. Ensure that the PostgreSQL server is started and that a test database has been created before running tests.
 
 You can download [Postgres.app](https://postgresapp.com) which is probably the easiest to run PostgreSQL on a Mac. It is also available as a [Docker image](https://hub.docker.com/_/postgres/) and by [direct installation](https://www.postgresql.org/download/).
 
 The `./build` command adds the (Git untracked) file developer.env to buildscripts/. You will need to edit the values of the `POSTGRES_TEST_*` variables to match your PostgreSQL setup. Note: `POSTGRES_TEST_HOST` and `POSTGRES_TEST_PASS` are commented out. The defaults are `localhost` and an empty password respectively.
 
-# The Concept Behind Event Sourcing
-
-By focusing on how the state *changes*, we can better understand how our domain works.
-
-The idea of event sourcing is to not simply store the current *state* of the application, but instead store each historical *change* to the state. We call such changes ‘events.’
-
-There are some benefits to using this idea; the most obvious ones are perhaps immutability and auditing. When an event has been recorded, that historical information will itself never change. It makes referring to the data much simpler, and you need never worry about concurrent updates. Every event also records a timestamp and a username which can be very useful metadata for auditing.
-
-Event sourcing also allows creating independent *projections* of the state. You can replay all the changes at any time, and maintain a different storage location with an alternate view into the data. For example you can gather all the current state for easy indexing and quick access. You can ignore a lot of the information, and focus on generating the data structure that makes your particular use case simple and performant.
-
-Event Sourcing is a product of Domain-Driven Design (DDD). In DDD, we have two carriers of state: the value object and the entity.
-
-## Value Objects
-
-Value objects are not modeled by this library, but it is still important to understand them.
-
-A value object is (as the term implies) an object that represents a specific value. Values never change; you can only replace a value with a new one. Value objects are therefore always immutable.
-
-Value objects typically have two functions: they can be compared for structural equality, and they can be validated for correct user input.
-
-It should not be possible to instantiate an invalid value object. The initializer (or factory) should prevent such, typically by throwing an exception or returning `nil` when invalid data is encountered. If the programmer can rely on this working, they will not need to validate the data in their code; it is enough to declare that a variable must be of the correct type (and not `nil`).
-
-Most value objects conform to `Equatable` and `Hashable`. They can thus be used in sets and as dictionary keys. A mutable object used as a dictionary key can be changed after it's added, altering its hash-code and making it impossible to find again. Immutability is necessary to guarantee correct behaviour.
-
-`Equatable` value objects can also be `Comparable` and they can be used in calculations. You might for example add (`+`) two value objects of same type to get their sum. Or you might multiply a value object with a scalar (e.g. a `Money` amount and an interest rate). The result of a calculation is typically an object of the same type as the input, but it could be otherwise. `Ingredient1` combined with `Ingredient2` might for example produce a `Cake`.
-
-Value objects should also be encapsulated. They should have an internal representation of data and an external interface. Users of the value object should only ever couple to the interface, never to the concrete data representation. That allows the storage strategy to change without breaking references to the value object. And it also helps the programmer stay focussed on the *meaning* of the value rather than its *composition*.
-
-Should, for example, the data representation of an amount of `Money` be composed of an `Int` counting the cents (100 meaning one dollar), a `Double` value of dollars (0.5 to represent 50 cents) or two separate `Int` values (one for dollars and one for cents, where cents < 100)? If you ever need to change the data format to support new use cases or higher precision, encapsulation is a guard against errors in all code outside the `Money` type itself.
-
-## Entities
-
-Not everything can be made immutable. If it were, we would have little (if any) use of software. We need to gather new data, and update existing data. We need to support business processes and user tasks, both of which rely heavily on *changing* the data stored in the system. Without data changes, the usefulness of the system would be very limited.
-
-But rather than manipulating *data*, in its specific format and structure, Domain-Driven Design (DDD) teaches us to focus on what that data *means* conceptually and/or metaphorically. And why and how it changes. The formatting and structure of the data can be altered in many ways and still represent the same meaning; the same state.
-
-DDD separates the state of the system into parts called entities; the state of the system is the aggregated state of all entities. Each `Entity` defines invariants that must be maintained. Like value objects, entities should be encapsulated. The interface of an `Entity` should only expose meaningful operations, not direct state/data manipulation. If an action executes an operation that is invalid/unsupported for its current state, the `Entity` should throw an exception.
-
-Unlike value objects, entities possess an identifier. Since the `Entity` is stateful, there must be a way to identify which entity to modify. To summarise there are three main differences between value objects and entities:
-
-1. Value objects are immutable, while entities are stateful.
-2. A value object has meaning, while an entity has an identity.
-    - Comparisons between value objects look at their entire structure,
-      while comparisons between entities only concern their ids.
-3. Value objects are often and easily discarded and recreated, while entities live on for a long time.
-
-## Events
-
-DDD teaches us to focus on how the business processes *change* the state rather than just what the state is at any given time. By focusing on how and why the state changes we can better understand how our domain works.
-
-This library employs event sourcing, which means that we define the state of an entity by listing all the changes in order that have been made to it since it was first added to the system/application. These changes are commonly referred to as `Event`s. Events specify the conceptual meaning of each change and lists its specific details. It also includes which user caused the change and at what time the `Event` was published.
-
-By storing all events in a way that persists their chronology, the current state of the entire system is well defined. In functional programming terms the state of each `Entity` can be implemented as a simple `fold()` operation. The state of the complete system being the aggregated state of all entities is then the `fold()` operation mapped over the list of lists that is the events of all entities.
-
-A CQRS solution can then synchronise (project) the events into a searchable query database. When the projection/query database is first set up, all the existing events should be processed in order. As new events are then published, the projection server should pick up those events and update the projection/query database accordingly.
-
-And it is also well defined what the state was at any point of time in the past. This fact can be used to debug the system. The events up to a given point in time can be copied to a new database and then used to recreate the system state at that time. Then experimentation can find the bug allowing it to be fixed.
-
-Projection can be used for other purposes than the Query side of CQRS. It can for example be used to communicate between bounded contexts. Or it can be used to generate one-off reports. Or myriad other things.
-
-## What About Aggregates?
-
-In his “Big Blue Book,” Eric Evans defines the term “aggregate.” This refers to a collection of entities that can only exist meaningfully as a group. This group always has an “aggregate root” which is one of the contained entities. (It can also be called “the root entity.”) Other event sourcing libraries add a class named `Aggregate` to refer to such groups, and to generate the events that define them. This is however a confusing term as it literally refers to the relationship between entities, but conceptually to the group as an object.
-
-The aggregate is called `Entity` in this library; mostly because every aggregate is clearly defined by referencing its root entity making the confusing term redundant. It has similar purpose as the `Aggregate` class in other libraries, but it doesn't introduce a third term for modelling. (The terms “entity” and “value object” are quite enough, thank you.)
-
-Other libraries often treat the `Aggregate` much like a list of commands rather than a modelling object. Commands often perform multiple operations on an entity in one batch. This is not how `Entity` is used here. Instead commands are assumed to be external to the model, and they can freely compose what operations to perform (or manipulate multiple entities) before publishing the generated events.
-
-The aggregate *rule* still applies though. Entities that belong to an aggregate relationship can only be accessed through the root entity. It should not be possible to access a child entity without its parent. It is however up to the developer to define these entity classes and invariants, and to couple them to the root entity so that they can add events (and replay them correctly when necessary for maintaining internal cnsistency).
-
-# EventStore Usage
-
-The EventStore model has been implemented as two separate targets. The Source target is used on the Command side of a CQRS solution, and the Projection target is used to synchronise the Source data with the Query side. There is currently no web server implementation included in EventStore, so the developer is free to use any web platform they desire.
-
-## Source
-
-The Source target is meant to implement the Command side (a.k.a. the write model) of a CQRS system. Import this in your web service code to start manipulating entities and publishing events.
-
-Other than setting up the web server and endpoints, implementing a Source service is rather simple. For each command request, all you have to do is reconstitute an `Entity` (or sometimes several) through an `EntityStore` object, call relevant operations on the loaded `Entity` and finally pass the `Entity` to an `EventPublisher`. Once that is done, the `Entity` object should be discarded as it only represents a specific version (now obsolete) of the domain entity.
-
-If another user (or automated process) has published new changes between your read and your publish, the `EventPublisher` will throw the `DomainError.concurrentUpdate` error and you can choose to retry the operation (reconstitute the new version from the `EntityStore`, repeat the changes, and publish again). Or you can abort the operation and return a `5xx` status to the client.
-
-The `Entity` should define a number of events, and calling its operations should add them to its `unpublishedEvents` list; these are the events that will be published by the `EventPublisher`. The `replay()` method should parse the event data of previously published events and update internal properties as needed for the entity's operations to make the right decisions when called.
-
-## Projection
-
-The Projection target is meant to implement the Command/Query side synchronisation for a CQRS system. This model is even simpler than the Source. An `Entity` in the Projection target is simply a value object that identifies the entity in question. And there is only one `Event` type.
-
-An `EventSource` object should be set up with a list of `Receptacle` objects. The `EventSource` should then be asked periodically to `projectEvents(maxCount: Int)`. This will find a maximum of `count` events read from the Source database and project them to the receptacles. A `PositionDelegate` is used to persist metadata on which events have already been processsed so they will not be reporocessed after a restart.
-
 # Technical Notes
 
 The point of DDD is to *not* focus on the technology or other implementation details. However, the technical choices do need to be mentioned, because developers believe they need to know them. If they actually do or not is beside the point.
 
-## Optimistic locking
+## Optimistic Locking
 
 Concurrent modification of shared state can be a big problem. If two users happen to change the same entity at the same time, there's a risk that they both read the same initial state, and then make conflicting changes that cannot be reconciled. This library employs “optimistic locking” to avoid such a scenario. Every entity has a `version` that is read when it is reconstituted, and again before publishing changes. Only if the version is the same at both instants is publishing allowed.
 
 If the stored state is the same, it is assumed that no other process has changed the state in the intervening time. If no one has yet published new changes, there is no possibility of a conflict, and publishing the current changes will be allowed. At that time, the version is also incremented to indicate to any other active process that the state has now changed.
 
 If the stored version number is different from what was read at reconstitution, the state has changed during the execution of this action. Since a different state can potentially affect the outcome of this action, all the current changes are to be considered invalid and publishing them is not allowed. Our only choices are to either abort the operation entirely or perform the action again. If we choose to repeat the action, we must discard the current, invalid state information, and reconstitute the entity from its new state. Then we can perform the action on this state, and try to publish those changes.
+
+## Type Checking
+
+Every entity in the system has a `Type` property. The `Type` property indicates what specific `EntityType` the entity has. The `EntityType` name should uniquely identify the class that implements this particular type of entity. (This is however not enforced.) When the first version (0) of an entity is added to the system, a row is added to the `Entities` table (see [the Tables Section](#tables) below). That row will include the name of the `EntityType` in the `type` column. When the entity is reconstituted by the `EventStore` that stored `type` is checked against the expected `EntityType`. If the values do not match, the `EntityStore` will return `null`.
+
+Do not use `nameof(MyEntity)`, `entity.GetType().Name` or any other reference to the actual class name. The name of the `EntityType` must never change, even if the relevant class is renamed. The name needs to always match the `type` column for already added entities. If the `EntityType` is changed, those entities can never be reconstituted (or worse: they may be reconstituted as instances of the wrong class).
 
 ## Tables
 
@@ -142,7 +58,7 @@ The `Entities` table:
 "version" INT
 ```
 
-The `Entities` table has two data columns: the `type` and the `version` of an entity. The version is used for concurrency checks (see Optimistic Concurrency above). The type is used as a runtime type-checker. When reconstituting the state of an entity it needs to be the type you expect. If it isn't, an error will be thrown.
+The `Entities` table has two data columns: the `type` and the `version` of an entity. The version is used for concurrency checks (see [Optimistic Locking](#optimistic-locking) above). The type is used as a runtime type-checker. When reconstituting the state of an entity it needs to be the type you expect. If it isn't, an error will be thrown.
 
 The `Events` table:
 
